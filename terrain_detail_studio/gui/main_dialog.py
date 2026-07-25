@@ -192,7 +192,10 @@ class TerrainDetailStudioDialog(QDialog if HAS_PYQT else object):
         try:
             from .login_dialog import TerrainDetailStudioLoginDialog
             login_dlg = TerrainDetailStudioLoginDialog(parent=self)
-            login_dlg.exec_()
+            if hasattr(login_dlg, 'exec'):
+                login_dlg.exec()
+            elif hasattr(login_dlg, 'exec_'):
+                login_dlg.exec_()
         except Exception as e:
             QMessageBox.warning(self, "Login Error", f"Could not open login dialog: {str(e)}")
 

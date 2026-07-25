@@ -58,6 +58,9 @@ class TerrainDetailStudioPlugin:
         try:
             from .gui.login_dialog import TerrainDetailStudioLoginDialog
             login_dlg = TerrainDetailStudioLoginDialog(parent=self.iface.mainWindow())
-            login_dlg.exec_()
+            if hasattr(login_dlg, 'exec'):
+                login_dlg.exec()
+            elif hasattr(login_dlg, 'exec_'):
+                login_dlg.exec_()
         except Exception as e:
             print(f"Error opening login dialog: {e}")
