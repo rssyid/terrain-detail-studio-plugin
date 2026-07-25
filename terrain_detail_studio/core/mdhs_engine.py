@@ -21,8 +21,8 @@ class MDHSEngine:
 
         options = gdal.DEMProcessingOptions(
             format='GTiff',
-            multidirectional=True,
-            altitude=altitude_deg,
+            computeEdges=True,
+            options=['-multidirectional', '-alt', str(altitude_deg)],
             creationOptions=[
                 'COMPRESS=DEFLATE',
                 'PREDICTOR=2',

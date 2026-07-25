@@ -22,6 +22,7 @@ class SlopeEngine:
         options = gdal.DEMProcessingOptions(
             format='GTiff',
             slopeFormat='degree',
+            computeEdges=True,
             creationOptions=[
                 'COMPRESS=DEFLATE',
                 'PREDICTOR=3',
