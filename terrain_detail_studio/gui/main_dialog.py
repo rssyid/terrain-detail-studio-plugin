@@ -40,10 +40,18 @@ class TerrainDetailStudioDialog(QDialog if HAS_PYQT else object):
         layout = QVBoxLayout()
         layout.setSpacing(12)
 
-        # Header Title Banner
+        # Header Title Banner with Login Button
+        header_layout = QHBoxLayout()
         header = QLabel("<b>TERRAIN DETAIL STUDIO FOR QGIS</b><br><small>Local-first LiDAR DTM Cartographic Relief Package (MDHS + Slope + Gaussian LRM)</small>")
         header.setStyleSheet("background-color: #FFE600; color: #000000; padding: 10px; border: 2px solid #000000; font-size: 13px;")
-        layout.addWidget(header)
+        header_layout.addWidget(header, 1)
+
+        btn_login = QPushButton("🔑 LOGIN / LICENSE")
+        btn_login.setStyleSheet("background-color: #00F0FF; color: #000000; font-weight: bold; padding: 12px 14px; border: 2px solid #000000; font-size: 11px;")
+        btn_login.clicked.connect(self.open_login_dialog)
+        header_layout.addWidget(btn_login)
+
+        layout.addLayout(header_layout)
 
         # Group 1: Input & Output Selection
         io_group = QGroupBox("1. File & Directory Selection")
@@ -179,6 +187,14 @@ class TerrainDetailStudioDialog(QDialog if HAS_PYQT else object):
             self.log_text.setPlainText("\n".join(log_lines))
         except Exception as e:
             self.log_text.setPlainText(f"Error inspecting file: {str(e)}")
+
+    def open_login_dialog(self):
+        try:
+            from .login_dialog import TerrainDetailStudioLoginDialog
+            login_dlg = TerrainDetailStudioLoginDialog(parent=self)
+            login_dlg.exec_()
+        except Exception as e:
+            QMessageBox.warning(self, "Login Error", f"Could not open login dialog: {str(e)}")
 
     def run_job(self):
         input_path = self.input_edit.text().strip()

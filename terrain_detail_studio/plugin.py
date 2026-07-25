@@ -24,15 +24,20 @@ class TerrainDetailStudioPlugin:
 
         self.action = QAction(icon, "Terrain Detail Studio", self.iface.mainWindow())
         self.action.triggered.connect(self.run)
+
+        self.login_action = QAction("License & Account Login...", self.iface.mainWindow())
+        self.login_action.triggered.connect(self.run_login)
         
         # Add to Raster Menu and Toolbar
         self.iface.addPluginToRasterMenu("Terrain Detail Studio", self.action)
+        self.iface.addPluginToRasterMenu("Terrain Detail Studio", self.login_action)
         self.iface.addRasterToolBarIcon(self.action)
 
     def unload(self):
         """Called when plugin is unloaded/disabled."""
         if self.action:
             self.iface.removePluginRasterMenu("Terrain Detail Studio", self.action)
+            self.iface.removePluginRasterMenu("Terrain Detail Studio", self.login_action)
             self.iface.removeRasterToolBarIcon(self.action)
 
     def run(self):
@@ -47,3 +52,12 @@ class TerrainDetailStudioPlugin:
             self.dlg.activateWindow()
         except Exception as e:
             print(f"Error opening Terrain Detail Studio dialog: {e}")
+
+    def run_login(self):
+        """Execute plugin login dialog window."""
+        try:
+            from .gui.login_dialog import TerrainDetailStudioLoginDialog
+            login_dlg = TerrainDetailStudioLoginDialog(parent=self.iface.mainWindow())
+            login_dlg.exec_()
+        except Exception as e:
+            print(f"Error opening login dialog: {e}")
