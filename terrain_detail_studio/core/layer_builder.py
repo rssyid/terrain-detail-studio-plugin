@@ -19,13 +19,23 @@ class LayerBuilder:
         """Adds layers to QGIS Layer Tree in mandatory order: LRM -> Slope -> MDHS."""
         try:
             from qgis.core import QgsProject, QgsRasterLayer
-            from qgis.PyQt.QtGui import QPainter
-            blend_multiply = QPainter.CompositionMode_Multiply
-            blend_normal = QPainter.CompositionMode_SourceOver
         except ImportError:
             # Standalone python fallback mock for non-QGIS test environment
             print(f"[LayerBuilder Mock] Created QGIS Group 'Terrain Detail Studio — {run_name}'")
             return
+
+        blend_multiply = None
+        blend_normal = None
+        try:
+            from qgis.PyQt.QtGui import QPainter
+            if hasattr(QPainter, 'CompositionMode_Multiply'):
+                blend_multiply = QPainter.CompositionMode_Multiply
+                blend_normal = QPainter.CompositionMode_SourceOver
+            elif hasattr(QPainter, 'CompositionMode'):
+                blend_multiply = getattr(QPainter.CompositionMode, 'CompositionMode_Multiply', None)
+                blend_normal = getattr(QPainter.CompositionMode, 'CompositionMode_SourceOver', None)
+        except Exception:
+            pass
 
         project = QgsProject.instance()
         root = project.layerTreeRoot()
