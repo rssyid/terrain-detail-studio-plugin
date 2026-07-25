@@ -33,20 +33,37 @@ class DEMInspector:
         data_type = gdal.GetDataTypeName(band.DataType)
         nodata = band.GetNoDataValue()
 
+        raster_width = ds.RasterXSize
+        raster_height = ds.RasterYSize
+
         gt = ds.GetGeoTransform()
-        pixel_width = abs(gt[1])
-        pixel_height = abs(gt[5])
+        pixel_width = abs(gt[1]) if gt else 1.0
+        pixel_height = abs(gt[5]) if gt else 1.0
 
         # CRS Check
         projection = ds.GetProjection()
         srs = osr.SpatialReference()
-        srs.ImportFromWkt(projection)
+        if projection:
+            try:
+                srs.ImportFromWkt(projection)
+            except Exception:
+                pass
         
-        is_projected = srs.IsProjected() == 1
-        unit_name = srs.GetLinearUnitName()
+        is_projected = bool(srs.IsProjected())
+        unit_name = "meter"
+        try:
+            if hasattr(srs, 'GetLinearUnitsName'):
+                unit_name = srs.GetLinearUnitsName()
+            elif hasattr(srs, 'GetAttrValue'):
+                unit_name = srs.GetAttrValue('UNIT', 0) or 'meter'
+        except Exception:
+            unit_name = "meter"
+
+        if not unit_name:
+            unit_name = "meter"
 
         warnings = []
-        if not is_projected or unit_name.lower() not in ['metre', 'meter', 'm']:
+        if not is_projected or str(unit_name).lower() not in ['metre', 'meter', 'm']:
             warnings.append(f"Geographic/Non-meter CRS detected ({unit_name}). Projected CRS in meters is recommended.")
 
         avg_pixel_size = (pixel_width + pixel_height) / 2.0
@@ -57,17 +74,20 @@ class DEMInspector:
         file_size_bytes = os.path.getsize(filepath)
         estimated_output_space = file_size_bytes * 5 # Expect 5x output storage space
         output_dir = os.path.dirname(filepath)
-        free_space = shutil.disk_usage(output_dir).free
-        if free_space < estimated_output_space:
-            warnings.append("Insufficient disk space available for processing outputs.")
+        try:
+            free_space = shutil.disk_usage(output_dir).free
+            if free_space < estimated_output_space:
+                warnings.append("Insufficient disk space available for processing outputs.")
+        except Exception:
+            pass
 
         ds = None # Close dataset
 
         return {
             'filepath': filepath,
             'filename': os.path.basename(filepath),
-            'width': ds.RasterXSize if ds else 0,
-            'height': ds.RasterYSize if ds else 0,
+            'width': raster_width,
+            'height': raster_height,
             'band_count': band_count,
             'data_type': data_type,
             'nodata': nodata,
