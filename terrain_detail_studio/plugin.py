@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Terrain Detail Studio QGIS Plugin Main Entry Class
+"""
 import os
 import sys
 
@@ -9,6 +12,7 @@ class TerrainDetailStudioPlugin:
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
         self.action = None
+        self.dlg = None
 
     def initGui(self):
         """Called by QGIS when plugin is loaded into GUI."""
@@ -32,13 +36,14 @@ class TerrainDetailStudioPlugin:
             self.iface.removeRasterToolBarIcon(self.action)
 
     def run(self):
-        """Execute plugin main dialog."""
+        """Execute plugin main dialog window."""
         try:
-            from qgis.PyQt.QtWidgets import QMessageBox
-            QMessageBox.information(
-                self.iface.mainWindow(),
-                "Terrain Detail Studio v1.0.0",
-                "Terrain Detail Studio plugin loaded successfully.\n\nLocal-first MDHS, Slope, and Gaussian LRM engines ready."
-            )
+            from .gui.main_dialog import TerrainDetailStudioDialog
+            if self.dlg is None:
+                self.dlg = TerrainDetailStudioDialog(iface=self.iface)
+            
+            self.dlg.show()
+            self.dlg.raise_()
+            self.dlg.activateWindow()
         except Exception as e:
-            print(f"Error running Terrain Detail Studio: {e}")
+            print(f"Error opening Terrain Detail Studio dialog: {e}")
