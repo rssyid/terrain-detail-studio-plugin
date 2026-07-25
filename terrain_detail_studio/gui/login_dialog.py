@@ -60,7 +60,13 @@ class TerrainDetailStudioLoginDialog(QDialog if HAS_PYQT else object):
         token_layout.addWidget(QLabel("License Token / Key:"))
         self.token_edit = QLineEdit()
         self.token_edit.setPlaceholderText("Enter your access token or key...")
-        self.token_edit.setEchoMode(QLineEdit.Password)
+        try:
+            if hasattr(QLineEdit, 'Password'):
+                self.token_edit.setEchoMode(QLineEdit.Password)
+            elif hasattr(QLineEdit, 'EchoMode') and hasattr(QLineEdit.EchoMode, 'Password'):
+                self.token_edit.setEchoMode(QLineEdit.EchoMode.Password)
+        except Exception:
+            pass
         token_layout.addWidget(self.token_edit)
         form_layout.addLayout(token_layout)
 
