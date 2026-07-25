@@ -1,0 +1,29 @@
+{
+  "code": "linear-feature",
+  "name": "Linear Feature (Drains, Bunds, Roads)",
+  "version": "1.0.0",
+  "min_plugin_version": "1.0.0",
+  "required_features": ["md_hillshade", "slope_texture", "local_relief", "cartographic_style"],
+  "input_rules": {
+    "band_count": 1,
+    "horizontal_unit": "meter",
+    "vertical_unit": "meter",
+    "pixel_size_m": {"min": 0.1, "max": 2.0}
+  },
+  "pipeline": {
+    "mdhs": {"method": "gdal_multidirectional", "altitude_deg": 45},
+    "slope": {"unit": "degree", "output_dtype": "float32"},
+    "local_relief": {
+      "method": "dtm_minus_gaussian_smoothed_dtm",
+      "algorithm_version": "lrm-gaussian-v1",
+      "radius_m": 20,
+      "sigma_mode": "radius_divided_by_3",
+      "nodata_policy": "valid_cells_renormalized"
+    }
+  },
+  "style": {
+    "mdhs": {"blend_mode": "normal", "opacity_percent": 100},
+    "slope": {"blend_mode": "multiply", "opacity_percent": 30},
+    "lrm": {"blend_mode": "multiply", "opacity_percent": 40, "statistics_mode": "robust_percentile"}
+  }
+}
